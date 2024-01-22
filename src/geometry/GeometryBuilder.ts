@@ -17,15 +17,22 @@ export class GeometryBuilder {
         ]);
 
         const colors = new Float32Array([
-            1, 0, 0, 1,
-            0, 1, 0, 1,
-            0, 0, 1, 1,
-            1, 0, 1, 1
+            1, 1, 1, 1,
+            1, 1, 1, 1,
+            1, 1, 1, 1,
+            1, 1, 1, 1
 
+        ])
+
+        const texCoords = new Float32Array([
+            0, 1, // bottom left
+            0, 0, // top left
+            1, 1, // bottom right
+            1, 0  // top right
         ])
 
 
 
-        return new Geometry(vertices, indices, colors);
+        return new Geometry(vertices, indices, colors, texCoords);
     }
 }
