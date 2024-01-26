@@ -10,6 +10,10 @@ struct VSOutput {
     @location(2) texCoord : vec2f,
 }
 
+@group(0) @binding(0)
+var<uniform> textureTiling:vec2f;
+
+
 @vertex
 fn unlitMaterialVS(
 in : VSInput,
@@ -21,19 +25,22 @@ in : VSInput,
     var out : VSOutput;
     out.position = vec4f(in.position, 1.0);
     out.color = in.color;
-    out.texCoord = in.texCoord;
+    out.texCoord = in.texCoord * textureTiling;
 
     return out;
 }
 
-@group(0) @binding(0)
+@group(1) @binding(0)
 var diffuseTexture : texture_2d<f32>;
 
-@group(0) @binding(1)
+@group(1) @binding(1)
 var diffuseSampler : sampler;
+
+@group(2) @binding(0)
+var<uniform> diffuseColor:vec4f;
 
 @fragment
 fn unlitMaterialFS(in : VSOutput) -> @location(0) vec4f
 {
-    return textureSample(diffuseTexture, diffuseSampler, in.texCoord) * in.color;
+    return textureSample(diffuseTexture, diffuseSampler, in.texCoord) * in.color * diffuseColor;
 }

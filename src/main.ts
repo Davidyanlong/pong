@@ -1,5 +1,7 @@
 import { GeometryBuffers } from "./attribute_buffers/GeometryBuffers";
 import { GeometryBuilder } from "./geometry/GeometryBuilder";
+import { Color } from "./math/Color";
+import { Vec2 } from "./math/Vec2";
 import { UnlitRenderPipeline } from "./render_pipelines/UnlitRenderPipeline";
 import { Texture2D } from "./texture/Texture2D";
 
@@ -40,7 +42,8 @@ async function init() {
   const image = await loadImage('./assets/test_texture.jpeg')
   unlitPipeline.diffuseTexture = await Texture2D.create(device, image);
 
-
+  unlitPipeline.textureTilling = new Vec2(3, 3)
+  // unlitPipeline.diffuseColor = new Color(1, 0, 0, 1)
 
   const draw = () => {
 
