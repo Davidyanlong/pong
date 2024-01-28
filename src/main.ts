@@ -1,6 +1,7 @@
 import { GeometryBuffers } from "./attribute_buffers/GeometryBuffers";
 import { GeometryBuilder } from "./geometry/GeometryBuilder";
 import { Color } from "./math/Color";
+import { Mat4x4 } from "./math/Mat4x4";
 import { Vec2 } from "./math/Vec2";
 import { UnlitRenderPipeline } from "./render_pipelines/UnlitRenderPipeline";
 import { Texture2D } from "./texture/Texture2D";
@@ -17,6 +18,8 @@ async function loadImage(path: string): Promise<HTMLImageElement> {
 
 }
 
+
+let angle = 0;
 
 async function init() {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -44,6 +47,7 @@ async function init() {
 
   unlitPipeline.textureTilling = new Vec2(3, 3)
   // unlitPipeline.diffuseColor = new Color(1, 0, 0, 1)
+ 
 
   const draw = () => {
 
@@ -59,7 +63,8 @@ async function init() {
     });
 
     // draw here
-
+    angle+=0.01;
+    unlitPipeline.transform = Mat4x4.createRotationMatrixZ(angle);
     unlitPipeline.draw(renderPassEncoder, geometryBuffer);
     renderPassEncoder.end();
     device.queue.submit([

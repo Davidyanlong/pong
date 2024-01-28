@@ -11,6 +11,9 @@ struct VSOutput {
 }
 
 @group(0) @binding(0)
+var<uniform> transform:mat4x4f;
+
+@group(0) @binding(1)
 var<uniform> textureTiling:vec2f;
 
 
@@ -23,7 +26,7 @@ in : VSInput,
 ) -> VSOutput
 {
     var out : VSOutput;
-    out.position = vec4f(in.position, 1.0);
+    out.position = transform * vec4f(in.position, 1.0);
     out.color = in.color;
     out.texCoord = in.texCoord * textureTiling;
 
