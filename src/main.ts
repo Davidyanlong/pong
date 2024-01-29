@@ -1,4 +1,5 @@
 import { GeometryBuffers } from "./attribute_buffers/GeometryBuffers";
+import { Camera } from "./camera/Camera";
 import { GeometryBuilder } from "./geometry/GeometryBuilder";
 import { Color } from "./math/Color";
 import { Mat4x4 } from "./math/Mat4x4";
@@ -38,14 +39,16 @@ async function init() {
     format: "bgra8unorm"
   });
 
+  const camera = new Camera(device);
+  camera.projectionView = Mat4x4.orthographic(-5, 5, -5, 5, 0, 1);
 
-  const unlitPipeline = new UnlitRenderPipeline(device)
+  const unlitPipeline = new UnlitRenderPipeline(device, camera)
   const geometry = new GeometryBuilder().createQuadGeometry()
   const geometryBuffer = new GeometryBuffers(device, geometry)
   const image = await loadImage('./assets/test_texture.jpeg')
   unlitPipeline.diffuseTexture = await Texture2D.create(device, image);
 
-  unlitPipeline.textureTilling = new Vec2(3, 3)
+  unlitPipeline.textureTilling = new Vec2(1, 1)
   // unlitPipeline.diffuseColor = new Color(1, 0, 0, 1)
  
 
@@ -64,7 +67,7 @@ async function init() {
 
     // draw here
     angle+=0.01;
-    unlitPipeline.transform = Mat4x4.createRotationMatrixZ(angle);
+    unlitPipeline.transform = Mat4x4.translation(0,0,0);
     unlitPipeline.draw(renderPassEncoder, geometryBuffer);
     renderPassEncoder.end();
     device.queue.submit([
