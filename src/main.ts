@@ -40,10 +40,11 @@ async function init() {
   });
 
   const camera = new Camera(device);
-  camera.projectionView = Mat4x4.orthographic(-5, 5, -5, 5, 0, 1);
+  camera.projectionView = Mat4x4.orthographic(-2, 2, -2, 2, 0, 1);
+  camera.projectionView = Mat4x4.perspective(90, canvas.width/canvas.height, 0.01, 3);
 
   const unlitPipeline = new UnlitRenderPipeline(device, camera)
-  const geometry = new GeometryBuilder().createQuadGeometry()
+  const geometry = new GeometryBuilder().createCubeGeometry()
   const geometryBuffer = new GeometryBuffers(device, geometry)
   const image = await loadImage('./assets/test_texture.jpeg')
   unlitPipeline.diffuseTexture = await Texture2D.create(device, image);
@@ -67,7 +68,7 @@ async function init() {
 
     // draw here
     angle+=0.01;
-    unlitPipeline.transform = Mat4x4.translation(0,0,0);
+    unlitPipeline.transform = Mat4x4.multiply(Mat4x4.translation(0,0,2), Mat4x4.rotationX(angle));
     unlitPipeline.draw(renderPassEncoder, geometryBuffer);
     renderPassEncoder.end();
     device.queue.submit([
