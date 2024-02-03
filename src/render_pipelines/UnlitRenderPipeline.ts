@@ -163,6 +163,12 @@ export class UnlitRenderPipeline {
                 targets: [{
                     format: "bgra8unorm"
                 }]
+            },
+            // CONFIGURE DEPTH
+            depthStencil: {
+                depthWriteEnabled: true,
+                depthCompare: "less",
+                format: "depth32float"
             }
         });
 

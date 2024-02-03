@@ -39,17 +39,32 @@ async function init() {
     format: "bgra8unorm"
   });
 
+  // DEPTH TEXTURE
+  const depthTextue = device.createTexture({
+    label:"depth Textue",
+    size:{
+      width: canvas.width,
+      height:canvas.height
+    },
+    format:"depth32float",
+    usage:GPUTextureUsage.RENDER_ATTACHMENT
+  })
+  
+
   const camera = new Camera(device);
   camera.projectionView = Mat4x4.orthographic(-2, 2, -2, 2, 0, 1);
   camera.projectionView = Mat4x4.perspective(90, canvas.width/canvas.height, 0.01, 3);
 
   const unlitPipeline = new UnlitRenderPipeline(device, camera)
+  const unlitPipeline2 = new UnlitRenderPipeline(device, camera)
   const geometry = new GeometryBuilder().createCubeGeometry()
   const geometryBuffer = new GeometryBuffers(device, geometry)
   const image = await loadImage('./assets/test_texture.jpeg')
   unlitPipeline.diffuseTexture = await Texture2D.create(device, image);
-
   unlitPipeline.textureTilling = new Vec2(1, 1)
+
+  unlitPipeline2.diffuseTexture = await Texture2D.create(device, image);
+  unlitPipeline2.textureTilling = new Vec2(1, 1)
   // unlitPipeline.diffuseColor = new Color(1, 0, 0, 1)
  
 
@@ -63,13 +78,24 @@ async function init() {
         storeOp: "store",
         clearValue: { r: 0.8, g: 0.8, b: 0.8, a: 1.0 },
         loadOp: "clear"
-      }]
+      }],
+      // CONFIGURE DEPTH
+      depthStencilAttachment:{
+        view:depthTextue.createView(),
+        depthLoadOp:"clear",
+        depthStoreOp:"store",
+        depthClearValue:1.0,
+      }
     });
 
     // draw here
     angle+=0.01;
-    unlitPipeline.transform = Mat4x4.multiply(Mat4x4.translation(0,0,2), Mat4x4.rotationX(angle));
+    unlitPipeline.transform = Mat4x4.multiply(Mat4x4.translation(0,0,1.5), Mat4x4.rotationX(angle));
     unlitPipeline.draw(renderPassEncoder, geometryBuffer);
+
+    unlitPipeline2.transform = Mat4x4.multiply(Mat4x4.translation(0.5,0.5,1.5), Mat4x4.rotationX(angle));
+    unlitPipeline2.draw(renderPassEncoder, geometryBuffer);
+
     renderPassEncoder.end();
     device.queue.submit([
       commandEncoder.finish()
