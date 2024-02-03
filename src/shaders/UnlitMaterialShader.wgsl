@@ -11,7 +11,7 @@ struct VSOutput {
 }
 
 @group(0) @binding(0)
-var<uniform> transform:mat4x4f;
+var<uniform> transforms:array<mat4x4f,100>;
 
 @group(0) @binding(1)
 var<uniform> textureTiling:vec2f;
@@ -25,11 +25,12 @@ fn unlitMaterialVS(
 in : VSInput,
 
     //builtins
-@builtin(vertex_index) vid : u32
+@builtin(vertex_index) vid : u32,
+@builtin(instance_index) iid : u32
 ) -> VSOutput
 {
     var out : VSOutput;
-    out.position = viewProjection * transform * vec4f(in.position, 1.0);
+    out.position = viewProjection * transforms[iid] * vec4f(in.position, 1.0);
     out.color = in.color;
     out.texCoord = in.texCoord * textureTiling;
 

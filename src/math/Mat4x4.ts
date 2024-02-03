@@ -10,6 +10,10 @@ export class Mat4x4 extends Float32Array {
         ])
     }
 
+    public static get BYTE_SIZE():number{
+        return 16 * Float32Array.BYTES_PER_ELEMENT;
+    }
+
     public static identity(): Mat4x4 {
         return new Mat4x4()
     }

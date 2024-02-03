@@ -30,7 +30,11 @@ export class UnlitRenderPipeline {
 
 
 
-    constructor(private device: GPUDevice, camera: Camera) {
+    constructor(
+        private device: 
+        GPUDevice, camera: Camera, 
+        transformsBuffer: UniformBuffer
+        ) {
         this.transformBuffer = new UniformBuffer(device,
             this._transform,
             "Transform buffer"
@@ -180,7 +184,7 @@ export class UnlitRenderPipeline {
                 {
                     binding: 0,
                     resource: {
-                        buffer: this.transformBuffer.buffer
+                        buffer: transformsBuffer.buffer
                     }
                 },
                 {
@@ -254,7 +258,10 @@ export class UnlitRenderPipeline {
         })
     }
 
-    public draw(renderPassEncoder: GPURenderPassEncoder, buffers: GeometryBuffers) {
+    public draw(
+        renderPassEncoder: GPURenderPassEncoder, 
+        buffers: GeometryBuffers,
+        instanceCount: number = 1) {
         renderPassEncoder.setPipeline(this.renderPipeline);
         renderPassEncoder.setVertexBuffer(0, buffers.positonBuffer)
 
@@ -274,9 +281,9 @@ export class UnlitRenderPipeline {
         // draw with index buffer
         if (buffers.indicesBuffer) {
             renderPassEncoder.setIndexBuffer(buffers.indicesBuffer, 'uint16');
-            renderPassEncoder.drawIndexed(buffers.indexCount!, 1, 0, 0, 0);
+            renderPassEncoder.drawIndexed(buffers.indexCount!, instanceCount, 0, 0, 0);
         } else {
-            renderPassEncoder.draw(buffers.vertexCount, 1, 0, 0);
+            renderPassEncoder.draw(buffers.vertexCount, instanceCount, 0, 0);
         }
 
 

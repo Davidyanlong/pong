@@ -6,6 +6,7 @@ import { Mat4x4 } from "./math/Mat4x4";
 import { Vec2 } from "./math/Vec2";
 import { UnlitRenderPipeline } from "./render_pipelines/UnlitRenderPipeline";
 import { Texture2D } from "./texture/Texture2D";
+import { UniformBuffer } from "./uniform_buffers/UniformBuffer";
 
 
 async function loadImage(path: string): Promise<HTMLImageElement> {
@@ -41,32 +42,47 @@ async function init() {
 
   // DEPTH TEXTURE
   const depthTextue = device.createTexture({
-    label:"depth Textue",
-    size:{
+    label: "depth Textue",
+    size: {
       width: canvas.width,
-      height:canvas.height
+      height: canvas.height
     },
-    format:"depth32float",
-    usage:GPUTextureUsage.RENDER_ATTACHMENT
+    format: "depth32float",
+    usage: GPUTextureUsage.RENDER_ATTACHMENT
   })
-  
+
+  // TRANSFORMS BUFFER
+  const transformsBubffer = new UniformBuffer(device, 100 * Mat4x4.BYTE_SIZE, "Transforms Buffer");
+  const transforms: Array<Mat4x4> = []
+  const transforms2: Float32Array= new Float32Array(100 * 16)
+
+  for (let i = 0; i < 100; i++) {
+    const trans = Mat4x4.translation(
+      Math.random() * 20 - 10,
+      Math.random() * 20 - 10,
+      Math.random() * 10 + 10,
+    )
+    transforms2.set(trans, i * 16)
+    transforms.push(trans)
+    // transformsBubffer.update(trans,i*Mat4x4.BYTE_SIZE)
+   
+  }
+  transformsBubffer.update(transforms2)
+
 
   const camera = new Camera(device);
   camera.projectionView = Mat4x4.orthographic(-2, 2, -2, 2, 0, 1);
-  camera.projectionView = Mat4x4.perspective(90, canvas.width/canvas.height, 0.01, 3);
+  camera.projectionView = Mat4x4.perspective(60, canvas.width / canvas.height, 0.01, 40);
 
-  const unlitPipeline = new UnlitRenderPipeline(device, camera)
-  const unlitPipeline2 = new UnlitRenderPipeline(device, camera)
+  const unlitPipeline = new UnlitRenderPipeline(device, camera, transformsBubffer)
+
   const geometry = new GeometryBuilder().createCubeGeometry()
   const geometryBuffer = new GeometryBuffers(device, geometry)
   const image = await loadImage('./assets/test_texture.jpeg')
   unlitPipeline.diffuseTexture = await Texture2D.create(device, image);
   unlitPipeline.textureTilling = new Vec2(1, 1)
-
-  unlitPipeline2.diffuseTexture = await Texture2D.create(device, image);
-  unlitPipeline2.textureTilling = new Vec2(1, 1)
   // unlitPipeline.diffuseColor = new Color(1, 0, 0, 1)
- 
+
 
   const draw = () => {
 
@@ -80,21 +96,22 @@ async function init() {
         loadOp: "clear"
       }],
       // CONFIGURE DEPTH
-      depthStencilAttachment:{
-        view:depthTextue.createView(),
-        depthLoadOp:"clear",
-        depthStoreOp:"store",
-        depthClearValue:1.0,
+      depthStencilAttachment: {
+        view: depthTextue.createView(),
+        depthLoadOp: "clear",
+        depthStoreOp: "store",
+        depthClearValue: 1.0,
       }
     });
 
     // draw here
-    angle+=0.01;
-    unlitPipeline.transform = Mat4x4.multiply(Mat4x4.translation(0,0,1.5), Mat4x4.rotationX(angle));
-    unlitPipeline.draw(renderPassEncoder, geometryBuffer);
+    angle += 0.01;
 
-    unlitPipeline2.transform = Mat4x4.multiply(Mat4x4.translation(0.5,0.5,1.5), Mat4x4.rotationX(angle));
-    unlitPipeline2.draw(renderPassEncoder, geometryBuffer);
+    // for (let i = 0; i < 10; i++) {
+    //   const trans =transforms[i]
+    //   transformsBubffer.update(Mat4x4.multiply(trans, Mat4x4.rotationX(angle)),i*Mat4x4.BYTE_SIZE)
+    // }
+    unlitPipeline.draw(renderPassEncoder, geometryBuffer, 100);
 
     renderPassEncoder.end();
     device.queue.submit([

@@ -42,6 +42,7 @@ export class Texture2D {
             { texture: this.texture },
             { width: imageBitmap.width, height: imageBitmap.height }
         )
+        
     }
 
     public  initializeFromData(data: ArrayBuffer, width: number, height: number) {
