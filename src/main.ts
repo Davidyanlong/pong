@@ -1,28 +1,15 @@
-import { GeometryBuffers } from "./attribute_buffers/GeometryBuffers";
+import { GeometryBuffersCollection } from "./attribute_buffers/GeometryBuffersCollection";
 import { Camera } from "./camera/Camera";
-import { GeometryBuilder } from "./geometry/GeometryBuilder";
+import { Ball } from "./game_objects/Ball";
+import { Paddle } from "./game_objects/Paddle";
 import { Color } from "./math/Color";
 import { Mat4x4 } from "./math/Mat4x4";
-import { Vec2 } from "./math/Vec2";
 import { Vec3 } from "./math/Vec3";
-import { UnlitRenderPipeline } from "./render_pipelines/UnlitRenderPipeline";
 import { Texture2D } from "./texture/Texture2D";
 import { UniformBuffer } from "./uniform_buffers/UniformBuffer";
 
 
-async function loadImage(path: string): Promise<HTMLImageElement> {
 
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.src = path;
-    image.onload = () => resolve(image);
-    image.onerror = () => reject;
-  })
-
-}
-
-
-let position = 0;
 
 async function init() {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -41,39 +28,41 @@ async function init() {
     format: "bgra8unorm"
   });
 
+  GeometryBuffersCollection.initialize(device);
   // DEPTH TEXTURE
-  const depthTextue = device.createTexture({
-    label: "depth Textue",
-    size: {
-      width: canvas.width,
-      height: canvas.height
-    },
-    format: "depth32float",
-    usage: GPUTextureUsage.RENDER_ATTACHMENT
-  })
+  const depthTextue = Texture2D.createDepthTexture(device, canvas.width, canvas.height);
 
   // TRANSFORMS BUFFER
   const transformsBubffer = new UniformBuffer(device, 100 * Mat4x4.BYTE_SIZE, "Transforms Buffer");
 
-  const trans = Mat4x4.translation(0, 0, 3)
+  const trans = Mat4x4.translation(0, 0, 0)
   transformsBubffer.update(trans)
 
+  // GAME OBJECT
+  const camera = new Camera(device, canvas.width/canvas.height);
+  camera.eye = new Vec3(0, 0, -20);
+  const paddle1 = new Paddle(device, camera)
+  paddle1.position.x = -5;
+  paddle1.color = new Color(1, 0, 0, 1);
 
-  const camera = new Camera(device);
-  const view = Mat4x4.lookAt(new Vec3(0,3,0), new Vec3(0,0,3),new Vec3(0,1,0))
-  const prespective = Mat4x4.perspective(60, canvas.width / canvas.height, 0.01, 30);
-  camera.projectionView = Mat4x4.multiply(prespective, view);
-  const unlitPipeline = new UnlitRenderPipeline(device, camera, transformsBubffer)
+  const paddle2 = new Paddle(device, camera)
+  paddle2.position.x = 5;
+  paddle2.color = new Color(0, 0, 1, 1);
 
-  const geometry = new GeometryBuilder().createCubeGeometry()
-  const geometryBuffer = new GeometryBuffers(device, geometry)
-  const image = await loadImage('./assets/test_texture.jpeg')
-  unlitPipeline.diffuseTexture = await Texture2D.create(device, image);
-  unlitPipeline.textureTilling = new Vec2(1, 1)
-  // unlitPipeline.diffuseColor = new Color(1, 0, 0, 1)
+  const ball = new Ball(device, camera);
 
+
+
+  const update = ()=>{
+    camera.update();
+    paddle1.update();
+    paddle2.update();
+    ball.update();
+  }
 
   const draw = () => {
+
+    update();
 
     const commandEncoder = device.createCommandEncoder();
 
@@ -81,26 +70,23 @@ async function init() {
       colorAttachments: [{
         view: gpuContext.getCurrentTexture().createView(),
         storeOp: "store",
-        clearValue: { r: 0.8, g: 0.8, b: 0.8, a: 1.0 },
+        clearValue: { r: 0.4, g: 0.9, b: 0.9, a: 1.0 },
         loadOp: "clear"
       }],
       // CONFIGURE DEPTH
       depthStencilAttachment: {
-        view: depthTextue.createView(),
+        view: depthTextue.texture.createView(),
         depthLoadOp: "clear",
         depthStoreOp: "store",
         depthClearValue: 1.0,
       }
     });
 
-    // draw here
-    position += 0.01;
 
-    const view = Mat4x4.lookAt(new Vec3(position, 3, position), new Vec3(0,0,3),new Vec3(0,1,0))
-  const prespective = Mat4x4.perspective(60, canvas.width / canvas.height, 0.01, 30);
-  camera.projectionView = Mat4x4.multiply(prespective, view);
-
-    unlitPipeline.draw(renderPassEncoder, geometryBuffer, 1);
+    // DRAW HERE
+    paddle1.draw(renderPassEncoder);
+    paddle2.draw(renderPassEncoder);
+    ball.draw(renderPassEncoder);
 
     renderPassEncoder.end();
     device.queue.submit([
