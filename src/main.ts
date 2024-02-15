@@ -4,6 +4,7 @@ import { GeometryBuilder } from "./geometry/GeometryBuilder";
 import { Color } from "./math/Color";
 import { Mat4x4 } from "./math/Mat4x4";
 import { Vec2 } from "./math/Vec2";
+import { Vec3 } from "./math/Vec3";
 import { UnlitRenderPipeline } from "./render_pipelines/UnlitRenderPipeline";
 import { Texture2D } from "./texture/Texture2D";
 import { UniformBuffer } from "./uniform_buffers/UniformBuffer";
@@ -21,7 +22,7 @@ async function loadImage(path: string): Promise<HTMLImageElement> {
 }
 
 
-let angle = 0;
+let position = 0;
 
 async function init() {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -53,27 +54,15 @@ async function init() {
 
   // TRANSFORMS BUFFER
   const transformsBubffer = new UniformBuffer(device, 100 * Mat4x4.BYTE_SIZE, "Transforms Buffer");
-  const transforms: Array<Mat4x4> = []
-  const transforms2: Float32Array= new Float32Array(100 * 16)
 
-  for (let i = 0; i < 100; i++) {
-    const trans = Mat4x4.translation(
-      Math.random() * 20 - 10,
-      Math.random() * 20 - 10,
-      Math.random() * 10 + 10,
-    )
-    transforms2.set(trans, i * 16)
-    transforms.push(trans)
-    // transformsBubffer.update(trans,i*Mat4x4.BYTE_SIZE)
-   
-  }
-  transformsBubffer.update(transforms2)
+  const trans = Mat4x4.translation(0, 0, 3)
+  transformsBubffer.update(trans)
 
 
   const camera = new Camera(device);
-  camera.projectionView = Mat4x4.orthographic(-2, 2, -2, 2, 0, 1);
-  camera.projectionView = Mat4x4.perspective(60, canvas.width / canvas.height, 0.01, 40);
-
+  const view = Mat4x4.lookAt(new Vec3(0,3,0), new Vec3(0,0,3),new Vec3(0,1,0))
+  const prespective = Mat4x4.perspective(60, canvas.width / canvas.height, 0.01, 30);
+  camera.projectionView = Mat4x4.multiply(prespective, view);
   const unlitPipeline = new UnlitRenderPipeline(device, camera, transformsBubffer)
 
   const geometry = new GeometryBuilder().createCubeGeometry()
@@ -105,13 +94,13 @@ async function init() {
     });
 
     // draw here
-    angle += 0.01;
+    position += 0.01;
 
-    // for (let i = 0; i < 10; i++) {
-    //   const trans =transforms[i]
-    //   transformsBubffer.update(Mat4x4.multiply(trans, Mat4x4.rotationX(angle)),i*Mat4x4.BYTE_SIZE)
-    // }
-    unlitPipeline.draw(renderPassEncoder, geometryBuffer, 100);
+    const view = Mat4x4.lookAt(new Vec3(position, 3, position), new Vec3(0,0,3),new Vec3(0,1,0))
+  const prespective = Mat4x4.perspective(60, canvas.width / canvas.height, 0.01, 30);
+  camera.projectionView = Mat4x4.multiply(prespective, view);
+
+    unlitPipeline.draw(renderPassEncoder, geometryBuffer, 1);
 
     renderPassEncoder.end();
     device.queue.submit([
