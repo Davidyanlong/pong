@@ -5,6 +5,7 @@ export class GeometryBuffers {
     public readonly indicesBuffer?: GPUBuffer;
     public readonly colorsBuffer?: GPUBuffer;
     public readonly texCoordsBuffer?:GPUBuffer;
+    public readonly normalsBuffer?: GPUBuffer;
 
     public readonly vertexCount: number;
     public readonly indexCount?: number;
@@ -58,7 +59,7 @@ export class GeometryBuffers {
         if (geometry.texCoords.length > 0) {
             this.texCoordsBuffer = device.createBuffer({
                 label: 'texCoords Buffer',
-                size: geometry.colors.byteLength,
+                size: geometry.texCoords.byteLength,
                 usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
             });
 
@@ -67,6 +68,21 @@ export class GeometryBuffers {
                 geometry.texCoords.buffer,
                 0,
                 geometry.texCoords.byteLength);
+        }
+
+         // NORMALS
+         if (geometry.normals.length > 0) {
+            this.normalsBuffer = device.createBuffer({
+                label: 'normal Buffer',
+                size: geometry.normals.byteLength,
+                usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
+            });
+
+            device.queue.writeBuffer(this.normalsBuffer,
+                0,
+                geometry.normals.buffer,
+                0,
+                geometry.normals.byteLength);
         }
     }
 }

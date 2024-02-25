@@ -39,40 +39,40 @@ export class GeometryBuilder {
     public createCubeGeometry(): Geometry {
 
         let vertices = new Float32Array([
-            // front
-            -0.5, -0.5, 0.5, // bottom left
-            -0.5, 0.5, 0.5, // top left
-            0.5, -0.5, 0.5, // bottom right
-            0.5, 0.5, 0.5, // top right
-            // back
-            -0.5, -0.5, -0.5, // bottom left
-            -0.5, 0.5, -0.5, // top left
-            0.5, -0.5, -0.5, // bottom right
-            0.5, 0.5, -0.5, // top right
+          // front
+          -0.5, -0.5, -0.5, // bottom left
+          -0.5, 0.5,  -0.5, // top left
+          0.5, -0.5,  -0.5, // bottom right
+          0.5, 0.5,   -0.5, // top right
+          // back
+          -0.5, -0.5, 0.5, // bottom left
+          -0.5, 0.5, 0.5, // top left
+          0.5, -0.5, 0.5, // bottom right
+          0.5, 0.5, 0.5, // top right
 
-            // left
-            -0.5, -0.5, -0.5, // bottom left
-            -0.5, 0.5, -0.5, // top left
-            -0.5, -0.5, 0.5, // bottom right
-            -0.5, 0.5, 0.5, // top right
+          // left
+          -0.5, -0.5, -0.5, // bottom left
+          -0.5, 0.5, -0.5, // top left
+          -0.5, -0.5, 0.5, // bottom right
+          -0.5, 0.5, 0.5, // top right
 
-            // right
-            0.5, -0.5, -0.5, // bottom left
-            0.5, 0.5, -0.5, // top left
-            0.5, -0.5, 0.5, // bottom right
-            0.5, 0.5, 0.5, // top right
+          // right
+          0.5, -0.5, -0.5, // bottom left
+          0.5, 0.5, -0.5, // top left
+          0.5, -0.5, 0.5, // bottom right
+          0.5, 0.5, 0.5, // top right
 
-            // top
-            -0.5, 0.5, -0.5, // bottom left
-            -0.5, 0.5, 0.5, // top left
-            0.5, 0.5, -0.5, // bottom right
-            0.5, 0.5, 0.5, // top right
+          // top
+          -0.5, 0.5, -0.5, // bottom left
+          -0.5, 0.5, 0.5, // top left
+          0.5, 0.5, -0.5, // bottom right
+          0.5, 0.5, 0.5, // top right
 
-            // bottom
-            -0.5, -0.5, -0.5, // bottom left
-            -0.5, -0.5, 0.5, // top left
-            0.5, -0.5, -0.5, // bottom right
-            0.5, -0.5, 0.5, // top right
+          // bottom
+          -0.5, -0.5, -0.5, // bottom left
+          -0.5, -0.5, 0.5, // top left
+          0.5, -0.5, -0.5, // bottom right
+          0.5, -0.5, 0.5, // top right
         ]);
 
         let indices = new Uint16Array([
@@ -162,6 +162,44 @@ export class GeometryBuilder {
             1, 0
         ]);
 
-        return new Geometry(vertices, indices, colors, texCoords);
+        let normals = new Float32Array([
+            // front
+            0,0,-1,
+            0,0,-1,
+            0,0,-1,
+            0,0,-1,
+            // back
+            0,0,1,
+            0,0,1,
+            0,0,1,
+            0,0,1,
+
+            // left
+            -1,0,0,
+            -1,0,0,
+            -1,0,0,
+            -1,0,0,
+
+            // right
+            1,0,0,
+            1,0,0,
+            1,0,0,
+            1,0,0,
+
+            // top
+            0,1,0,
+            0,1,0,
+            0,1,0,
+            0,1,0,
+
+            // bottom
+            0,-1,0,
+            0,-1,0,
+            0,-1,0,
+            0,-1,0
+        ]);
+
+
+        return new Geometry(vertices, indices, colors, texCoords, normals);
     }
 }

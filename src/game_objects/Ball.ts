@@ -1,13 +1,15 @@
 import { GeometryBuffersCollection } from "../attribute_buffers/GeometryBuffersCollection";
 import { Camera } from "../camera/Camera";
+import { AmbientLight } from "../lights/AmbientLight";
+import { DirectionalLight } from "../lights/DirectionalLight";
 import { Color } from "../math/Color";
 import { Mat4x4 } from "../math/Mat4x4";
 import { Vec3 } from "../math/Vec3";
-import { UnlitRenderPipeline } from "../render_pipelines/UnlitRenderPipeline";
+import { RenderPipeline } from "../render_pipelines/RenderPipeline";
 import { UniformBuffer } from "../uniform_buffers/UniformBuffer";
 
 export class Ball {
-    private pipeline:UnlitRenderPipeline;
+    private pipeline:RenderPipeline;
     private transformBuffer:UniformBuffer
 
     private transform = Mat4x4.identity();
@@ -17,9 +19,12 @@ export class Ball {
 
     public color = new Color(1, 1, 1, 1);
 
-    constructor(device:GPUDevice, camera:Camera){
+    constructor(device:GPUDevice,
+         camera:Camera,
+         ambientLight:AmbientLight,
+         directionalLight:DirectionalLight){
         this.transformBuffer = new UniformBuffer(device, this.transform, 'Ball Transform Buffer');
-        this.pipeline = new UnlitRenderPipeline(device, camera, this.transformBuffer);
+        this.pipeline = new RenderPipeline(device, camera, this.transformBuffer,ambientLight, directionalLight);
 
     }
 
