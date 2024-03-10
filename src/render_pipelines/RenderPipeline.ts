@@ -2,6 +2,7 @@ import { GeometryBuffers } from "../attribute_buffers/GeometryBuffers";
 import { Camera } from "../camera/Camera";
 import { AmbientLight } from "../lights/AmbientLight";
 import { DirectionalLight } from "../lights/DirectionalLight";
+import { PointLightsCollection } from "../lights/PointLight";
 import { Color } from "../math/Color";
 import { Vec2 } from "../math/Vec2";
 import shaderSource from "../shaders/MaterialShader.wgsl?raw"
@@ -27,8 +28,10 @@ export class RenderPipeline {
         private device: 
         GPUDevice, camera: Camera, 
         transformsBuffer: UniformBuffer,
+        normalMatrixBuffer: UniformBuffer,
         ambientLight:AmbientLight,
-        directionLight:DirectionalLight
+        directionLight:DirectionalLight,
+        pointLights:PointLightsCollection
         ) {
 
         this.textureTillingBuffer = new UniformBuffer(device,
@@ -38,6 +41,7 @@ export class RenderPipeline {
         this.diffuseColorBuffer = new UniformBuffer(device,
             this._diffuseColor,
             "diffuseColor");
+
 
         const shaderModule = device.createShaderModule({
             code: shaderSource
@@ -100,6 +104,13 @@ export class RenderPipeline {
                     buffer: {
                         type: "uniform"
                     }
+                },
+                {
+                    binding: 2,
+                    visibility: GPUShaderStage.VERTEX,
+                    buffer: {
+                        type: "uniform"
+                    }
                 }
             ]
         })
@@ -154,7 +165,15 @@ export class RenderPipeline {
                     buffer: {
                         type: "uniform"
                     }
-                }
+                },
+                {
+                    binding: 2,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    buffer: {
+                        type: "uniform"
+                    }
+                },
+                
             ]
         })
 
@@ -204,6 +223,12 @@ export class RenderPipeline {
                 {
                     binding: 1,
                     resource: {
+                        buffer: normalMatrixBuffer.buffer
+                    }
+                },
+                {
+                    binding: 2,
+                    resource: {
                         buffer: this.textureTillingBuffer.buffer
                     }
                 }
@@ -223,6 +248,7 @@ export class RenderPipeline {
         })
 
         this.lightBindGroup = device.createBindGroup({
+            label: "Lights Bind Group",
             layout: lightsGroupLayout,
             entries: [
                 {
@@ -235,6 +261,12 @@ export class RenderPipeline {
                     binding: 1,
                     resource: {
                         buffer: directionLight.buffer.buffer
+                    }
+                },
+                {
+                    binding: 2,
+                    resource: {
+                        buffer: pointLights.buffer.buffer
                     }
                 }
             ]

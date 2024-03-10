@@ -1,9 +1,11 @@
 import { GeometryBuffersCollection } from "./attribute_buffers/GeometryBuffersCollection";
 import { Camera } from "./camera/Camera";
 import { Ball } from "./game_objects/Ball";
+import { Floor } from "./game_objects/Floor";
 import { Paddle } from "./game_objects/Paddle";
 import { AmbientLight } from "./lights/AmbientLight";
 import { DirectionalLight } from "./lights/DirectionalLight";
+import { PointLightsCollection } from "./lights/PointLight";
 import { Color } from "./math/Color";
 import { Mat4x4 } from "./math/Mat4x4";
 import { Vec3 } from "./math/Vec3";
@@ -50,19 +52,30 @@ async function init() {
   directionalLight.intensity = 1;
   directionalLight.direction = new Vec3(0,0,1);
 
+  const pointLights = new PointLightsCollection(device);
+  pointLights.lights[0].color = new Color(1, 0, 0, 1);
+  pointLights.lights[0].intensity = 2;
+  pointLights.lights[0].position = new Vec3(4, 2, -1);
+  pointLights.lights[1].color = new Color(0, 1, 0, 1);
+  pointLights.lights[1].intensity = 2;
+  pointLights.lights[1].position = new Vec3(-4, 2, -1);
+  pointLights.lights[2].color = new Color(0, 0, 1, 1);
+  pointLights.lights[2].intensity = 2;
+  pointLights.lights[2].position = new Vec3(2, -4, -1);
+
   // GAME OBJECT
   const camera = new Camera(device, canvas.width/canvas.height);
   camera.eye = new Vec3(0, 0, -20);
-  const paddle1 = new Paddle(device, camera, ambientLight, directionalLight)
+  const paddle1 = new Paddle(device, camera, ambientLight, directionalLight, pointLights)
   paddle1.position.x = -5;
-  paddle1.color = new Color(1, 0, 0, 1);
+  paddle1.color = new Color(1, 0.3, 0.3, 1);
 
-  const paddle2 = new Paddle(device, camera, ambientLight, directionalLight)
+  const paddle2 = new Paddle(device, camera, ambientLight, directionalLight, pointLights)
   paddle2.position.x = 5;
-  paddle2.color = new Color(0, 0, 1, 1);
+  paddle2.color = new Color(0.3, 0.3, 1, 1);
 
-  const ball = new Ball(device, camera,ambientLight, directionalLight);
-
+  const ball = new Ball(device, camera,ambientLight, directionalLight, pointLights);
+  const floor = new Floor(device, camera, ambientLight, directionalLight, pointLights);
 
 
   const update = ()=>{
@@ -72,6 +85,8 @@ async function init() {
     paddle1.update();
     paddle2.update();
     ball.update();
+    floor.update();
+    pointLights.update();
   }
 
   const draw = () => {
@@ -101,6 +116,7 @@ async function init() {
     paddle1.draw(renderPassEncoder);
     paddle2.draw(renderPassEncoder);
     ball.draw(renderPassEncoder);
+    floor.draw(renderPassEncoder);
 
     renderPassEncoder.end();
     device.queue.submit([
