@@ -3,6 +3,7 @@ import { Camera } from "./camera/Camera";
 import { Ball } from "./game_objects/Ball";
 import { Floor } from "./game_objects/Floor";
 import { Paddle } from "./game_objects/Paddle";
+import { InputManager } from "./input/InputManager";
 import { AmbientLight } from "./lights/AmbientLight";
 import { DirectionalLight } from "./lights/DirectionalLight";
 import { PointLightsCollection } from "./lights/PointLight";
@@ -33,6 +34,9 @@ async function init() {
   });
 
   GeometryBuffersCollection.initialize(device);
+
+  const inputManager = new InputManager()
+
   // DEPTH TEXTURE
   const depthTextue = Texture2D.createDepthTexture(device, canvas.width, canvas.height);
 
@@ -53,12 +57,18 @@ async function init() {
   directionalLight.direction = new Vec3(0,0,1);
 
   const pointLights = new PointLightsCollection(device);
+  // 点光源 红灯
   pointLights.lights[0].color = new Color(1, 0, 0, 1);
   pointLights.lights[0].intensity = 2;
   pointLights.lights[0].position = new Vec3(4, 2, -1);
+  // 点光源 绿地
   pointLights.lights[1].color = new Color(0, 1, 0, 1);
   pointLights.lights[1].intensity = 2;
   pointLights.lights[1].position = new Vec3(-4, 2, -1);
+  pointLights.lights[1].attenConst = 0.2;
+  pointLights.lights[1].attenLinear = 0.01;
+  pointLights.lights[1].attenQuad = 0.1;
+  // 点光源 蓝灯
   pointLights.lights[2].color = new Color(0, 0, 1, 1);
   pointLights.lights[2].intensity = 2;
   pointLights.lights[2].position = new Vec3(2, -4, -1);
@@ -66,11 +76,11 @@ async function init() {
   // GAME OBJECT
   const camera = new Camera(device, canvas.width/canvas.height);
   camera.eye = new Vec3(0, 0, -20);
-  const paddle1 = new Paddle(device, camera, ambientLight, directionalLight, pointLights)
+  const paddle1 = new Paddle(device, inputManager, camera, ambientLight, directionalLight, pointLights)
   paddle1.position.x = -5;
   paddle1.color = new Color(1, 0.3, 0.3, 1);
 
-  const paddle2 = new Paddle(device, camera, ambientLight, directionalLight, pointLights)
+  const paddle2 = new Paddle(device, inputManager, camera, ambientLight, directionalLight, pointLights)
   paddle2.position.x = 5;
   paddle2.color = new Color(0.3, 0.3, 1, 1);
 

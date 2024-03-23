@@ -63,6 +63,13 @@ struct PointLight
     @location(0) color: vec3f,
     @location(1) intensity: f32,
     @location(2) position: vec3f,
+    // constant
+    @location(3) attenConst: f32,
+    // linear
+    @location(4) attenLin: f32,
+    // quadratic
+    @location(5) attenQuad: f32,
+
 };
 
 @group(2) @binding(0)
@@ -96,7 +103,16 @@ fn materialFS(in : VSOutput) -> @location(0) vec4f
     {
         var lightDir = normalize(positionalLights[i].position - in.fragPos);
         var dotLight = max(dot(normal, lightDir), 0.0);
-        lightAmount  += positionalLights[i].color * positionalLights[i].intensity * dotLight;
+
+
+        var distance = length(positionalLights[i].position - in.fragPos);
+        var attenuation = positionalLights[i].attenConst 
+        + positionalLights[i].attenLin * distance 
+        + positionalLights[i].attenQuad * distance * distance;
+
+        attenuation = 1.0/ attenuation;
+
+         lightAmount  += positionalLights[i].color * positionalLights[i].intensity * dotLight * attenuation;
     }
 
    // return vec4f(lightDir,1);
