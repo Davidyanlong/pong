@@ -22,7 +22,9 @@ export class RenderPipeline {
 
     private diffuseColorBuffer: UniformBuffer
     private _diffuseColor: Color = Color.white();
-
+    
+    private shininessBuffer:UniformBuffer;
+    private _shininess = 32;
 
     constructor(
         private device: 
@@ -41,6 +43,11 @@ export class RenderPipeline {
         this.diffuseColorBuffer = new UniformBuffer(device,
             this._diffuseColor,
             "diffuseColor");
+
+        this.shininessBuffer = new UniformBuffer(device, 
+            new Float32Array([this._shininess]),
+            "Shininess Buffer");
+        
 
 
         const shaderModule = device.createShaderModule({
@@ -123,6 +130,12 @@ export class RenderPipeline {
                 buffer: {
                     type: "uniform"
                 }
+            },{
+                binding: 1,
+                visibility: GPUShaderStage.VERTEX,
+                buffer: {
+                    type: "uniform"
+                }
             }]
         })
 
@@ -142,6 +155,13 @@ export class RenderPipeline {
                 },
                 {
                     binding: 2,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    buffer: {
+                        type: "uniform"
+                    }
+                },
+                {
+                    binding: 3,
                     visibility: GPUShaderStage.FRAGMENT,
                     buffer: {
                         type: "uniform"
@@ -243,6 +263,12 @@ export class RenderPipeline {
                     resource: {
                         buffer: camera.buffer.buffer
                     }
+                },
+                {
+                    binding: 1,
+                    resource: {
+                        buffer: camera.eyeBuffer.buffer
+                    }
                 }
             ]
         })
@@ -271,6 +297,11 @@ export class RenderPipeline {
                 }
             ]
         });
+    }
+
+    public set shininess(value:number){
+        this._shininess = value;
+        this.shininessBuffer.update(new Float32Array([value]));
     }
 
     public set diffuseTexture(texture: Texture2D) {
@@ -302,6 +333,13 @@ export class RenderPipeline {
                     binding: 2,
                     resource: {
                         buffer:this.diffuseColorBuffer.buffer
+                    }
+
+                },
+                {
+                    binding: 3,
+                    resource: {
+                        buffer:this.shininessBuffer.buffer
                     }
 
                 }

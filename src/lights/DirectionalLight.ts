@@ -4,14 +4,17 @@ import { UniformBuffer } from "../uniform_buffers/UniformBuffer";
 
 export class DirectionalLight {
     // 只使用RGB三个颜色值，
-    public color = new Color(1,1,1,1);
+    public color = Color.white();
     public intensity = 1;
     public direction = new Vec3(0,-1,0)
+    public specularColor = Color.white();
+    public specularIntensity = 1;
 
     public buffer: UniformBuffer
     constructor(device:GPUDevice){
+        const byteSize =  12 * Float32Array.BYTES_PER_ELEMENT;
         // 4 位的长度为 rgb + intensity
-        this.buffer = new UniformBuffer(device, 8*Float32Array.BYTES_PER_ELEMENT, 'DirectionalLight Color Buffer');
+        this.buffer = new UniformBuffer(device, byteSize, 'DirectionalLight Color Buffer');
     }
     public update(){
             this.buffer.update(new Float32Array([
@@ -22,7 +25,11 @@ export class DirectionalLight {
                 this.direction.x, 
                 this.direction.y, 
                 this.direction.z,
-                0
+                0,
+                this.specularColor.r, 
+                this.specularColor.g, 
+                this.specularColor.b, 
+                this.specularIntensity,
             ]));
      }
 }

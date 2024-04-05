@@ -3,11 +3,12 @@ import { Camera } from "../camera/Camera";
 import { InputManager } from "../input/InputManager";
 import { AmbientLight } from "../lights/AmbientLight";
 import { DirectionalLight } from "../lights/DirectionalLight";
-import { PointLightsCollection } from "../lights/PointLight";
+import { PointLight, PointLightsCollection } from "../lights/PointLight";
 import { Color } from "../math/Color";
 import { Mat3x3 } from "../math/Mat3x3";
 import { Mat4x4 } from "../math/Mat4x4";
 import { Vec3 } from "../math/Vec3";
+import { Vec2 } from "../math/Vec2";
 import { RenderPipeline } from "../render_pipelines/RenderPipeline";
 import { UniformBuffer } from "../uniform_buffers/UniformBuffer";
 
@@ -32,12 +33,12 @@ export class Paddle {
         camera: Camera,
         ambientLight: AmbientLight,
         directionalLight: DirectionalLight,
-        pointLightCollcetion: PointLightsCollection) {
+        pointLights: PointLightsCollection) {
         this.transformBuffer = new UniformBuffer(device, this.transform, 'Paddle Transform Buffer');
         this.normalMatrixBuffer = new UniformBuffer(device, 16 * Float32Array.BYTES_PER_ELEMENT, 'Paddle Normal Matrix');
 
 
-        this.pipeline = new RenderPipeline(device, camera, this.transformBuffer, this.normalMatrixBuffer, ambientLight, directionalLight, pointLightCollcetion);
+        this.pipeline = new RenderPipeline(device, camera, this.transformBuffer, this.normalMatrixBuffer, ambientLight, directionalLight, pointLights);
 
     }
 

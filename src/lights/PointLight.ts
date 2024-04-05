@@ -9,6 +9,8 @@ export class PointLight {
     public attenConst = 1;
     public attenLinear = 0.1;
     public attenQuad = 0.032;
+    public specularColor = Color.white();
+    public specularIntensity = 1;
 }
 
 export class PointLightsCollection {
@@ -21,7 +23,7 @@ export class PointLightsCollection {
     ]
 
     constructor(device: GPUDevice) {
-        const byteSize = 3 * 12 * Float32Array.BYTES_PER_ELEMENT;
+        const byteSize = 3 * 16 * Float32Array.BYTES_PER_ELEMENT;
         this.buffer = new UniformBuffer(device, byteSize, "Point Lights");
     }
 
@@ -47,11 +49,14 @@ export class PointLightsCollection {
                 // 二次参数
                 this.lights[i].attenQuad,
                 0,
-                0
-
+                0,
+                this.lights[i].specularColor.r,
+                this.lights[i].specularColor.g,
+                this.lights[i].specularColor.b,
+                this.lights[i].specularIntensity
             ])
 
-            this.buffer.update(data, i * 12 * Float32Array.BYTES_PER_ELEMENT);
+            this.buffer.update(data, i * 16 * Float32Array.BYTES_PER_ELEMENT);
         }
 
 

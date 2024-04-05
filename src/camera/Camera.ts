@@ -6,6 +6,7 @@ export class Camera {
 
     // BUFFER
     public buffer: UniformBuffer;
+    public eyeBuffer: UniformBuffer;
 
     // VIEW PROPERTIES
     public eye = new Vec3(0, 0, -3);
@@ -25,7 +26,7 @@ export class Camera {
 
     constructor(device: GPUDevice, private aspectRatio: number) {
         this.buffer = new UniformBuffer(device, this.projectionView, "Camera buffer");
-
+        this.eyeBuffer = new UniformBuffer(device, 16,"Camera Eye buffer");
 
     }
     public update() {
@@ -34,5 +35,6 @@ export class Camera {
         this.projectionView = Mat4x4.multiply(this.perspective, this.view);
 
         this.buffer.update(this.projectionView);
+        this.eyeBuffer.update(this.eye);
     }
 }
