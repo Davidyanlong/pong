@@ -34,6 +34,21 @@ export class Texture2D {
           return new Texture2D(device, depthTextue);
     }
 
+
+    public static createShadowTexture(device:GPUDevice, width: number, height: number): Texture2D {
+        const depthTextue = device.createTexture({
+            label: "Shadow Map Depth Textue",
+            size: {
+              width: width,
+              height: height
+            },
+            format: "depth32float",
+            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_DST | GPUTextureUsage.TEXTURE_BINDING
+          })
+
+          return new Texture2D(device, depthTextue);
+    }
+
     private createTextureAndSampler(width: number, height: number) {
         this.texture = this.device.createTexture({
             size: { width, height },

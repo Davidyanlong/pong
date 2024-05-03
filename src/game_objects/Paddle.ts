@@ -11,9 +11,12 @@ import { Vec3 } from "../math/Vec3";
 import { Vec2 } from "../math/Vec2";
 import { RenderPipeline } from "../render_pipelines/RenderPipeline";
 import { UniformBuffer } from "../uniform_buffers/UniformBuffer";
+import { ShadowRenderPipeline } from "../render_pipelines/ShadowRenderPipeline";
+import { ShadowCamera } from "../camera/ShadowCamera";
 
 export class Paddle {
     private pipeline: RenderPipeline;
+    private shadowPipeline: ShadowRenderPipeline;
     private transformBuffer: UniformBuffer
     private normalMatrixBuffer: UniformBuffer;
 
@@ -31,6 +34,7 @@ export class Paddle {
         device: GPUDevice,
         private inputManager: InputManager,
         camera: Camera,
+        shadowCamera: ShadowCamera,
         ambientLight: AmbientLight,
         directionalLight: DirectionalLight,
         pointLights: PointLightsCollection) {
@@ -39,7 +43,7 @@ export class Paddle {
 
 
         this.pipeline = new RenderPipeline(device, camera, this.transformBuffer, this.normalMatrixBuffer, ambientLight, directionalLight, pointLights);
-
+        this.shadowPipeline = new ShadowRenderPipeline(device, shadowCamera, this.transformBuffer)
     }
 
     public update() {
@@ -86,5 +90,9 @@ export class Paddle {
     public draw(renderPassEncoder: GPURenderPassEncoder) {
         this.pipeline.diffuseColor = this.color;
         this.pipeline.draw(renderPassEncoder, GeometryBuffersCollection.cubeBuffers);
+    }
+
+    public drawShadows(renderPassEncoder: GPURenderPassEncoder) {
+        this.shadowPipeline.draw(renderPassEncoder, GeometryBuffersCollection.cubeBuffers)
     }
 }

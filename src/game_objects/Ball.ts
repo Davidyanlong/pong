@@ -1,5 +1,6 @@
 import { GeometryBuffersCollection } from "../attribute_buffers/GeometryBuffersCollection";
 import { Camera } from "../camera/Camera";
+import { ShadowCamera } from "../camera/ShadowCamera";
 import { AmbientLight } from "../lights/AmbientLight";
 import { DirectionalLight } from "../lights/DirectionalLight";
 import { PointLightsCollection } from "../lights/PointLight";
@@ -8,10 +9,12 @@ import { Mat3x3 } from "../math/Mat3x3";
 import { Mat4x4 } from "../math/Mat4x4";
 import { Vec3 } from "../math/Vec3";
 import { RenderPipeline } from "../render_pipelines/RenderPipeline";
+import { ShadowRenderPipeline } from "../render_pipelines/ShadowRenderPipeline";
 import { UniformBuffer } from "../uniform_buffers/UniformBuffer";
 
 export class Ball {
     private pipeline: RenderPipeline;
+    private shadowPipeline: ShadowRenderPipeline;
     private transformBuffer: UniformBuffer
     private normalMatrixBuffer: UniformBuffer;
 
@@ -24,13 +27,14 @@ export class Ball {
 
     constructor(device: GPUDevice,
         camera: Camera,
+        shadowCamera: ShadowCamera,
         ambientLight: AmbientLight,
         directionalLight: DirectionalLight,
         pointLightCollection: PointLightsCollection) {
         this.transformBuffer = new UniformBuffer(device, this.transform, 'Ball Transform Buffer');
         this.normalMatrixBuffer = new UniformBuffer(device, 16 * Float32Array.BYTES_PER_ELEMENT, "Ball Normal Matrix");
-        this.pipeline = new RenderPipeline(device, camera, this.transformBuffer, this.normalMatrixBuffer,ambientLight, directionalLight, pointLightCollection);
-
+        this.pipeline = new RenderPipeline(device, camera, this.transformBuffer, this.normalMatrixBuffer, ambientLight, directionalLight, pointLightCollection);
+        this.shadowPipeline = new ShadowRenderPipeline(device, shadowCamera, this.transformBuffer)
     }
 
     public update() {
@@ -51,5 +55,9 @@ export class Ball {
     public draw(renderPassEncoder: GPURenderPassEncoder) {
         this.pipeline.diffuseColor = this.color;
         this.pipeline.draw(renderPassEncoder, GeometryBuffersCollection.cubeBuffers);
+    }
+
+    public drawShadows(renderPassEncoder: GPURenderPassEncoder) {
+        this.shadowPipeline.draw(renderPassEncoder, GeometryBuffersCollection.cubeBuffers)
     }
 }
