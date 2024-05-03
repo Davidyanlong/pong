@@ -46,7 +46,11 @@ export class Texture2D {
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_DST | GPUTextureUsage.TEXTURE_BINDING
           })
 
-          return new Texture2D(device, depthTextue);
+          const tex = new Texture2D(device, depthTextue);
+          tex.sampler = device.createSampler({
+            compare:'less-equal',
+          })
+          return tex
     }
 
     private createTextureAndSampler(width: number, height: number) {

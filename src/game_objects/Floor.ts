@@ -1,5 +1,6 @@
 import { GeometryBuffersCollection } from "../attribute_buffers/GeometryBuffersCollection";
 import { Camera } from "../camera/Camera";
+import { ShadowCamera } from "../camera/ShadowCamera";
 import { AmbientLight } from "../lights/AmbientLight";
 import { DirectionalLight } from "../lights/DirectionalLight";
 import { PointLightsCollection } from "../lights/PointLight";
@@ -11,26 +12,29 @@ import { RenderPipeline } from "../render_pipelines/RenderPipeline";
 import { UniformBuffer } from "../uniform_buffers/UniformBuffer";
 
 export class Floor {
-    private pipeline: RenderPipeline;
+    public pipeline: RenderPipeline;
     private transformBuffer: UniformBuffer;
     private normalMatrixBuffer: UniformBuffer;
 
     private transform = Mat4x4.identity();
 
     public scale = new Vec3(40, 40, 1);
-    public position = new Vec3(0, 0, 1);
+    public position = new Vec3(0, 0, 6);
 
     public color = new Color(0.2, 0.2, 0.2, 1);
 
     private angle = 0;
 
-    constructor(device: GPUDevice, camera: Camera,
+    constructor(
+        device: GPUDevice, 
+        camera: Camera,
+        shadowCamera:ShadowCamera,
         ambientLight: AmbientLight, directionalLight: DirectionalLight, pointLightCollection: PointLightsCollection) {
 
         this.transformBuffer = new UniformBuffer(device, this.transform, "Floor Transform");
         this.normalMatrixBuffer = new UniformBuffer(device, 16 * Float32Array.BYTES_PER_ELEMENT, "Floor Normal Matrix");
 
-        this.pipeline = new RenderPipeline(device, camera, 
+        this.pipeline = new RenderPipeline(device, camera, shadowCamera,
             this.transformBuffer, this.normalMatrixBuffer,
             ambientLight, directionalLight, pointLightCollection);
     }

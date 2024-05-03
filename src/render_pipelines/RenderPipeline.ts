@@ -1,5 +1,6 @@
 import { GeometryBuffers } from "../attribute_buffers/GeometryBuffers";
 import { Camera } from "../camera/Camera";
+import { ShadowCamera } from "../camera/ShadowCamera";
 import { AmbientLight } from "../lights/AmbientLight";
 import { DirectionalLight } from "../lights/DirectionalLight";
 import { PointLightsCollection } from "../lights/PointLight";
@@ -26,9 +27,13 @@ export class RenderPipeline {
     private shininessBuffer:UniformBuffer;
     private _shininess = 32;
 
+    private _diffuseTexture!:Texture2D;
+    private _shadowTexture!:Texture2D;
+
     constructor(
         private device: 
         GPUDevice, camera: Camera, 
+        shadowCamera: ShadowCamera,
         transformsBuffer: UniformBuffer,
         normalMatrixBuffer: UniformBuffer,
         ambientLight:AmbientLight,
@@ -136,7 +141,14 @@ export class RenderPipeline {
                 buffer: {
                     type: "uniform"
                 }
-            }]
+            },{
+                binding: 2,
+                visibility: GPUShaderStage.VERTEX,
+                buffer: {
+                    type: "uniform"
+                }
+            }
+        ]
         })
 
 
@@ -166,7 +178,22 @@ export class RenderPipeline {
                     buffer: {
                         type: "uniform"
                     }
-                }
+                },
+                {
+                    binding: 4,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    texture: {
+                        sampleType: "depth"
+                    }
+                },
+                {
+                    binding: 5,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    sampler: {
+                        type: "comparison"
+                    }
+
+                },
             ]
         })
 
@@ -269,6 +296,12 @@ export class RenderPipeline {
                     resource: {
                         buffer: camera.eyeBuffer.buffer
                     }
+                },
+                {
+                    binding: 2,
+                    resource: {
+                        buffer: shadowCamera.buffer.buffer
+                    }
                 }
             ]
         })
@@ -305,7 +338,10 @@ export class RenderPipeline {
     }
 
     public set diffuseTexture(texture: Texture2D) {
-        this.materialBindGroup = this.createMaterialBindGroup(texture);
+        this._diffuseTexture = texture;
+        if(this._diffuseTexture !=null && this._shadowTexture !=null){
+            this.materialBindGroup = this.createMaterialBindGroup(this._diffuseTexture, this._shadowTexture);
+        }
     }
     public set diffuseColor(value: Color) {
         this._diffuseColor = value;
@@ -317,7 +353,14 @@ export class RenderPipeline {
         this.textureTillingBuffer.update(value);
     }
 
-    private createMaterialBindGroup(texture: Texture2D) {
+    public set shadowTexture(texture:Texture2D){
+        this._shadowTexture = texture;
+        if(this._diffuseTexture!=null && this._shadowTexture!=null){
+            this.materialBindGroup = this.createMaterialBindGroup(this._diffuseTexture,  this._shadowTexture);
+        }
+    }
+
+    private createMaterialBindGroup(texture: Texture2D, shadowTexture:Texture2D) {
         return this.device.createBindGroup({
             layout: this.materialBindGroupLayout,
             entries: [
@@ -342,7 +385,15 @@ export class RenderPipeline {
                         buffer:this.shininessBuffer.buffer
                     }
 
-                }
+                },
+                {
+                    binding: 4,
+                    resource: shadowTexture.texture.createView()
+                },
+                {
+                    binding: 5,
+                    resource: shadowTexture.sampler
+                },
             ]
         })
     }
