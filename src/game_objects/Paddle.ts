@@ -13,6 +13,7 @@ import { RenderPipeline } from "../render_pipelines/RenderPipeline";
 import { UniformBuffer } from "../uniform_buffers/UniformBuffer";
 import { ShadowRenderPipeline } from "../render_pipelines/ShadowRenderPipeline";
 import { ShadowCamera } from "../camera/ShadowCamera";
+import { RectCollider } from "../collider/RectCollider";
 
 export class Paddle {
     public pipeline: RenderPipeline;
@@ -29,6 +30,8 @@ export class Paddle {
 
     public speed = 0.2;
     public playerOne = true;
+
+    public collider = new RectCollider()
 
     constructor(
         device: GPUDevice,
@@ -85,6 +88,12 @@ export class Paddle {
         normalMatrix = Mat3x3.transpose(normalMatrix);
 
         this.normalMatrixBuffer.update(Mat3x3.to16AlignedMat3x3(normalMatrix));
+
+        
+        this.collider.x = this.position.x - this.scale.x / 2;
+        this.collider.y = this.position.y - this.scale.y / 2;
+        this.collider.width = this.scale.x;
+        this.collider.height = this.scale.y;
     }
 
     public draw(renderPassEncoder: GPURenderPassEncoder) {

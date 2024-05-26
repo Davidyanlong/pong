@@ -100,6 +100,7 @@ async function init() {
   paddle2.playerOne = false;
   paddle2.position.x = 5;
   paddle2.color = new Color(0.3, 0.3, 1, 1);
+  paddle2.playerOne = false;
 
   const ball = new Ball(device, camera, shadowCamera, ambientLight, directionalLight, pointLights);
   ball.pipeline.shadowTexture = shadowTexture
@@ -168,8 +169,9 @@ async function init() {
     ball.update();
     floor.update();
     pointLights.update();
-    
     shadowCamera.update();
+    ball.collidesPaddle(paddle1);
+    ball.collidesPaddle(paddle2);
   }
 
   const draw = () => {

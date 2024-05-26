@@ -8,4 +8,10 @@ export class Vec2 extends Float32Array {
     public set x(value: number) { this[0] = value; }
     public get y(): number { return this[1]; }
     public set y(value: number) { this[1] = value; }
+
+    public normalize(){
+        const length = Math.sqrt(this[0]* this[0]+ this[1] * this[1]);
+        this[0] /= length;
+        this[1] /= length;
+    }
 }
