@@ -17,6 +17,7 @@ import { Paddle } from "./Paddle";
 
 export class Ball {
     public pipeline: RenderPipeline;
+    public pipeline2: RenderPipeline;
     private shadowPipeline: ShadowRenderPipeline;
     private transformBuffer: UniformBuffer
     private normalMatrixBuffer: UniformBuffer;
@@ -42,6 +43,7 @@ export class Ball {
         this.transformBuffer = new UniformBuffer(device, this.transform, 'Ball Transform Buffer');
         this.normalMatrixBuffer = new UniformBuffer(device, 16 * Float32Array.BYTES_PER_ELEMENT, "Ball Normal Matrix");
         this.pipeline = new RenderPipeline(device, camera, shadowCamera, this.transformBuffer, this.normalMatrixBuffer, ambientLight, directionalLight, pointLightCollection);
+        this.pipeline2 = new RenderPipeline(device, camera, shadowCamera, this.transformBuffer, this.normalMatrixBuffer, ambientLight, directionalLight, pointLightCollection);
         this.shadowPipeline = new ShadowRenderPipeline(device, shadowCamera, this.transformBuffer)
     }
 
@@ -77,6 +79,11 @@ export class Ball {
     public draw(renderPassEncoder: GPURenderPassEncoder) {
         this.pipeline.diffuseColor = this.color;
         this.pipeline.draw(renderPassEncoder, GeometryBuffersCollection.cubeBuffers);
+    }
+
+    public drawSecond(renderPassEncoder: GPURenderPassEncoder) {
+        this.pipeline2.diffuseColor = this.color;
+        this.pipeline2.draw(renderPassEncoder, GeometryBuffersCollection.cubeBuffers);
     }
 
     public drawShadows(renderPassEncoder: GPURenderPassEncoder) {

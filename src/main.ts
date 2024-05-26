@@ -87,26 +87,50 @@ async function init() {
   camera.eye = new Vec3(0, 0, -20);
   const shadowCamera = new ShadowCamera(device)
   shadowCamera.eye = new Vec3(0, 0, -20);
+
+  const halfHeight = canvas.height / 2;
+
+  const playerCamera = new Camera(device, canvas.width/halfHeight);
+  playerCamera.eye = new Vec3(-16, 0, -7);
+  playerCamera.up = new Vec3(0,0, -1);
+
+  const player2Camera = new Camera(device, canvas.width/halfHeight);
+  player2Camera.eye = new Vec3(16, 0, -7);
+  player2Camera.up = new Vec3(0,0, -1);
+
   // -PADDLES, BALL, FLOOR ect...
   const paddle1 = new Paddle(device, inputManager, camera, shadowCamera, ambientLight, directionalLight, pointLights)
   paddle1.pipeline.shadowTexture = shadowTexture
+  paddle1.pipeline2.shadowTexture = shadowTexture
   paddle1.playerOne = true;
   paddle1.position.x = -5;
   paddle1.color = new Color(1, 0.3, 0.3, 1);
+  paddle1.pipeline.camera = playerCamera;
+  paddle1.pipeline2.camera = player2Camera
 
   const paddle2 = new Paddle(device, inputManager, camera, shadowCamera, ambientLight, directionalLight, pointLights)
   paddle2.pipeline.shadowTexture = shadowTexture
+  paddle2.pipeline2.shadowTexture = shadowTexture
 
   paddle2.playerOne = false;
   paddle2.position.x = 5;
   paddle2.color = new Color(0.3, 0.3, 1, 1);
   paddle2.playerOne = false;
+  paddle2.pipeline.camera = playerCamera;
+  paddle2.pipeline2.camera = player2Camera
+
 
   const ball = new Ball(device, camera, shadowCamera, ambientLight, directionalLight, pointLights);
   ball.pipeline.shadowTexture = shadowTexture
+  ball.pipeline2.shadowTexture = shadowTexture
+  ball.pipeline.camera = playerCamera;
+  ball.pipeline2.camera = player2Camera
 
   const floor = new Floor(device, camera,shadowCamera,  ambientLight, directionalLight, pointLights);
   floor.pipeline.shadowTexture = shadowTexture
+  floor.pipeline2.shadowTexture = shadowTexture
+  floor.pipeline.camera = playerCamera;
+  floor.pipeline2.camera = player2Camera;
 
 
   const shadowPass = (commandEncoder: GPUCommandEncoder) =>{
@@ -133,7 +157,7 @@ async function init() {
 
 
 
-  const scenePass = (commandEncoder: GPUCommandEncoder) =>{
+  const splitScreenPass = (commandEncoder: GPUCommandEncoder) =>{
     const renderPassEncoder = commandEncoder.beginRenderPass({
       colorAttachments: [{
         view: gpuContext.getCurrentTexture().createView(),
@@ -149,13 +173,21 @@ async function init() {
         depthClearValue: 1.0,
       }
     });
-
+    renderPassEncoder.setViewport(0, 0, canvas.width, canvas.height / 2, 0, 1);
 
     // DRAW HERE
     paddle1.draw(renderPassEncoder);
     paddle2.draw(renderPassEncoder);
     ball.draw(renderPassEncoder);
     floor.draw(renderPassEncoder);
+
+    renderPassEncoder.setViewport(0, canvas.height / 2, canvas.width, canvas.height / 2, 0, 1);
+    // DRAW HERE
+    paddle1.drawSecond(renderPassEncoder);
+    paddle2.drawSecond(renderPassEncoder);
+    ball.drawSecond(renderPassEncoder);
+    floor.drawSecond(renderPassEncoder);
+
 
     renderPassEncoder.end();
   }
@@ -172,6 +204,8 @@ async function init() {
     shadowCamera.update();
     ball.collidesPaddle(paddle1);
     ball.collidesPaddle(paddle2);
+    playerCamera.update();
+    player2Camera.update();
   }
 
   const draw = () => {
@@ -181,7 +215,7 @@ async function init() {
     const commandEncoder = device.createCommandEncoder();
     
     shadowPass(commandEncoder);
-    scenePass(commandEncoder);
+    splitScreenPass(commandEncoder);
     
     device.queue.submit([
       commandEncoder.finish()

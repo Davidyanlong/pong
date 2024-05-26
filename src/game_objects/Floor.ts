@@ -13,6 +13,7 @@ import { UniformBuffer } from "../uniform_buffers/UniformBuffer";
 
 export class Floor {
     public pipeline: RenderPipeline;
+    public pipeline2: RenderPipeline;
     private transformBuffer: UniformBuffer;
     private normalMatrixBuffer: UniformBuffer;
 
@@ -37,6 +38,10 @@ export class Floor {
         this.pipeline = new RenderPipeline(device, camera, shadowCamera,
             this.transformBuffer, this.normalMatrixBuffer,
             ambientLight, directionalLight, pointLightCollection);
+
+        this.pipeline2 = new RenderPipeline(device, camera, shadowCamera,
+            this.transformBuffer, this.normalMatrixBuffer,
+            ambientLight, directionalLight, pointLightCollection);
     }
 
     public update() {
@@ -59,4 +64,11 @@ export class Floor {
         this.pipeline.diffuseColor = this.color;
         this.pipeline.draw(renderPassEncoder, GeometryBuffersCollection.cubeBuffers);
     }
+
+    public drawSecond(renderPassEncoder: GPURenderPassEncoder) {
+        this.pipeline2.diffuseColor = this.color;
+        this.pipeline2.draw(renderPassEncoder, GeometryBuffersCollection.cubeBuffers);
+    }
+
+    
 }
